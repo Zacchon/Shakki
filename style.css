@@ -1,8 +1,17 @@
 .square {
     width: 100px;
     height: 100px;
-    font-size: 60px;
-    text-align: center;
+    
+    /* Magic for putting the inner elements on top of each other */
+    display: inline-grid;
+    grid-template-areas: "inner-div";
+    
+    align-items: center;
+}
+
+/* Magic for putting these inner elements on top of each other */
+.square div {
+    grid-area: inner-div;
 }
 
 .white.square {
@@ -15,4 +24,23 @@
 
 .square.selected {
     background-color: rgb(110, 108, 176);
+}
+
+.pieceText {
+    text-align: center;
+    font-size: 60px;
+}
+
+.moveIndicator {
+    visibility: hidden;
+}
+
+.moveIndicator.active {
+    visibility: visible;
+    margin: 0 auto;
+    background-color: lightblue;
+    opacity: 80%;
+    height: 16px;
+    width: 16px;
+    border-radius: 100%;
 }
