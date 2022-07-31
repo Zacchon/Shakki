@@ -1,0 +1,2 @@
+# Shakki
+ Shakkilauta & AI
