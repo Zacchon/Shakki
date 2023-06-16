@@ -78,7 +78,7 @@ const showPossibleMoves = () => {
  * Try moving a piece from the currently active square to (row, col). 
  * It is assumed that activeSquare is not empty.
  * */  
-tryMove = (row, col) => {
+const tryMove = (row, col) => {
     const movedPiece = chessBoard.state[activeSquare[0]][activeSquare[1]].piece;
     if (!movedPiece) {
         activeSquare = [null, null];

@@ -2,6 +2,9 @@ const deltaToPos = (piece, delta) => {
     return [piece.row + delta[0], piece.column + delta[1]];
 };
 
+/**
+ * Construct possible moves given an array of changes to the current position of a piece.
+ */
 const movesFromDeltas = (deltas, piece) => {
     const moves = [];
     for (const dpos of deltas) {
@@ -13,6 +16,9 @@ const movesFromDeltas = (deltas, piece) => {
     return moves;
 };
 
+/**
+ * Construct possible moves from an array of directions to which the piece can move an arbitrary distance.  
+ */
 const movesFromDDeltas = (ddeltas, piece) => {
     const moves = [];
     for (const dd of ddeltas) {
@@ -34,6 +40,7 @@ const movesFromDDeltas = (ddeltas, piece) => {
 
 class Piece {
     constructor(color) {
+        /** 1 for white, -1 for black */
         this.color = color;
         this.board = undefined;
         this.row = undefined;
@@ -149,9 +156,9 @@ class King extends Piece {
 
             for (const piece of [pieceLeft, pieceRight]) {
                 if (piece instanceof Rook && !piece.hasMoved && piece.color === this.color) {
-                    const dir = Math.sign(this.column - piece.column);
+                    const dir = Math.sign(piece.column - this.column);
                     let canCastle = true;
-                    for (let col = this.column; col != piece.column; col+=dir) {
+                    for (let col = this.column + dir; col != piece.column; col+=dir) {
                         if (Math.abs(this.column - col) <= 2) {
                             if (!this.board.isSafeFor(this.row, col, this.color)) {
                                 canCastle = false;
