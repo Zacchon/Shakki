@@ -1,50 +1,13 @@
 const boardTable = document.getElementById("board");
 
-const Piece = {
-    White: {pawn: 1, knight: 2, bishop: 3, rook: 4, queen: 5, king: 6, },
-    Black: {pawn:-1, knight:-2, bishop:-3, rook:-4, queen:-5, king:-6, },
-    empty: 0,
-};
+const chessBoard = new Board(8, 8);
+const WHITE = 1;
+const BLACK = -1;
+chessBoard.setRow([new Rook(BLACK), new Knight(BLACK), new Bishop(BLACK), new Queen(BLACK), new King(BLACK), new Bishop(BLACK), new Knight(BLACK), new Rook(BLACK)], 0);
+chessBoard.setRow([new Pawn(BLACK), new Pawn(BLACK), new Pawn(BLACK), new Pawn(BLACK), new Pawn(BLACK), new Pawn(BLACK), new Pawn(BLACK), new Pawn(BLACK)], 1);
+chessBoard.setRow([new Pawn(WHITE), new Pawn(WHITE), new Pawn(WHITE), new Pawn(WHITE), new Pawn(WHITE), new Pawn(WHITE), new Pawn(WHITE), new Pawn(WHITE)], 6);
+chessBoard.setRow([new Rook(WHITE), new Knight(WHITE), new Bishop(WHITE), new Queen(WHITE), new King(WHITE), new Bishop(WHITE), new Knight(WHITE), new Rook(WHITE)], 7);
 
-const valueMapping = [0, 1, 3, 3, 5, 9, 420];
-const _pieceValue = (x) => {
-    return valueMapping[abs(x)];
-};
-
-const chessBoard = [
-    [   
-        Piece.Black.rook, Piece.Black.knight, Piece.Black.bishop, Piece.Black.queen, 
-        Piece.Black.king, Piece.Black.bishop, Piece.Black.knight, Piece.Black.rook
-    ],
-    Array(8).fill(Piece.Black.pawn),
-    Array(8).fill(Piece.empty),
-    Array(8).fill(Piece.empty),
-    Array(8).fill(Piece.empty),
-    Array(8).fill(Piece.empty),
-    Array(8).fill(Piece.White.pawn),
-    [   
-        Piece.White.rook, Piece.White.knight, Piece.White.bishop, Piece.White.queen, 
-        Piece.White.king, Piece.White.bishop, Piece.White.knight, Piece.White.rook
-    ]
-];
-
-const pieceSymbol = {
-};
-pieceSymbol[Piece.White.pawn] = "♙";
-pieceSymbol[Piece.White.knight] = "♘";
-pieceSymbol[Piece.White.bishop] = "♗";
-pieceSymbol[Piece.White.rook] = "♖";
-pieceSymbol[Piece.White.queen] = "♕";
-pieceSymbol[Piece.White.king] = "♔";
-
-pieceSymbol[Piece.Black.pawn] = "♟";
-pieceSymbol[Piece.Black.knight] = "♞";
-pieceSymbol[Piece.Black.bishop] = "♝";
-pieceSymbol[Piece.Black.rook] = "♜";
-pieceSymbol[Piece.Black.queen] = "♛";
-pieceSymbol[Piece.Black.king] = "♚";
-
-pieceSymbol[Piece.empty] = "";
 
 let activeSquare = [null, null];
 
@@ -81,11 +44,10 @@ const getSquareElem = (row, col) => {
 };
 
 const updateSquare = (row, col) => {
-    const piece = chessBoard[row][col];
     const squareElem = getSquareElem(row, col);
     const pieceTextElem = squareElem.getElementsByClassName("pieceText")[0];
 
-    pieceTextElem.innerText = pieceSymbol[piece];
+    pieceTextElem.innerText = chessBoard.state[row][col].getSymbol();
 };
 
 const updateAllSquares = () => {
@@ -97,116 +59,35 @@ const updateAllSquares = () => {
 };
 
 const getPossibleMoves = () => {
-    const row = activeSquare[0];
-    const col = activeSquare[1];
-    const movedPiece = chessBoard[row][col];
-    const moves = [];
-    if (movedPiece === 0) {
-        return false;
-    }
-    const pieceType = Math.abs(movedPiece);
-    
-    const deltaStatus = (delta) => {
-        const rnew = row + delta[0];
-        const cnew = col + delta[1];
-
-        if (rnew < 0 || rnew > 7 || cnew < 0 || cnew > 7 || chessBoard[rnew][cnew] * movedPiece > 0) return "blocked";
-        return chessBoard[rnew][cnew] === Piece.empty ? "empty" : "enemy";
-    };
-
-    const pushIfDeltaOk = (deltas) => {
-        for (const dpos of deltas) {
-            const rnew = row + dpos[0];
-            const cnew = col + dpos[1];
-
-            if (0 <= rnew && rnew <= 7 && 0 <= cnew && cnew <= 7 && chessBoard[rnew][cnew] * movedPiece <= 0) {
-                moves.push([rnew, cnew]);
-            }
-        }
-    };
-
-    if (pieceType === Piece.White.pawn) {
-        // 1 for white, -1 for black
-        const direction = movedPiece / Math.abs(movedPiece);
-        if (row === 0 || row === 7) return false;
-        
-        if (chessBoard[row-direction][col] === Piece.empty) {
-            moves.push([row-direction, col]);
-            
-            const doubleMove = direction === 1 && row === 6 || direction === -1 && row === 1;
-            if (doubleMove && chessBoard[row-2*direction][col] === Piece.empty) {
-                moves.push([row-2*direction, col]);
-            }
-        }
-        if (col > 0 && chessBoard[row-direction][col-1] * movedPiece < 0) {
-            moves.push([row-direction, col-1]);
-        }
-        if (col < 7 && chessBoard[row-direction][col+1] * movedPiece < 0) {
-            moves.push([row-direction, col+1]);
-        }
-
-    } else if (pieceType === Piece.White.knight) {
-        const deltas = [[1,2], [1,-2], [-1,2], [-1,-2], [2,1], [2,-1], [-2,1], [-2,-1]];
-        pushIfDeltaOk(deltas);
-
-    } else if (pieceType === Piece.White.king) {
-        const deltas = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]];
-        pushIfDeltaOk(deltas);
-        
-    } else {
-        const deltaDeltas = [];
-        if (pieceType === Piece.White.bishop || pieceType === Piece.White.queen) {
-            deltaDeltas.push([-1,-1, 0], [-1,1, 1], [1,-1, 2], [1,1, 3]);
-        }
-        if (pieceType === Piece.White.rook || pieceType === Piece.White.queen) {
-            deltaDeltas.push([0,-1, 4], [0,1, 5], [-1,0, 6], [1,0, 7]);
-        }
-        const lastDeltas = Array(8).fill([0,0]);
-        const deltas = [];
-
-        let DEBUG_iters = 100;
-        while (deltaDeltas.length, DEBUG_iters--) {
-            for (const dd of deltaDeltas) {
-                const prevDelta = lastDeltas[dd[2]];
-                const drnew = dd[0] + prevDelta[0];
-                const dcnew = dd[1] + prevDelta[1];
-                
-                const status = deltaStatus([drnew, dcnew]);
-                if (status === "enemy" || status === "empty") {
-                    deltas.push([drnew, dcnew]);
-                    lastDeltas[dd[2]] = [drnew, dcnew];
-                }
-                if (status === "blocked" || status === "enemy") {
-                    deltaDeltas.splice(deltaDeltas.indexOf(dd), 1);
-                }
-            }
-        }
-        if (DEBUG_iters === 0) console.log("DANGEROUS LOOP in getPossibleMoves");
-
-        pushIfDeltaOk(deltas);
-    }
-    return moves;
+    if (activeSquare[0] === null || !chessBoard.state[activeSquare[0]][activeSquare[1]].piece) return [];
+    return chessBoard.state[activeSquare[0]][activeSquare[1]].piece.legalMoves();
 };
-
 
 const showPossibleMoves = () => {
     const moves = getPossibleMoves();
     if (!moves) return;
 
     for (const move of moves) {
-        const row = move[0];
-        const col = move[1];
+        const [row, col] = move;
         const square = getSquareElem(row, col);
         square.getElementsByClassName("moveIndicator")[0].classList.add("active");
     }
 };
 
-
-const tryMove = (row, col) => {
-    const movedPiece = chessBoard[activeSquare[0]][activeSquare[1]];
-    chessBoard[activeSquare[0]][activeSquare[1]] = Piece.empty;
+/** 
+ * Try moving a piece from the currently active square to (row, col). 
+ * It is assumed that activeSquare is not empty.
+ * */  
+tryMove = (row, col) => {
+    const movedPiece = chessBoard.state[activeSquare[0]][activeSquare[1]].piece;
+    if (!movedPiece) {
+        activeSquare = [null, null];
+        return;
+    }
     
-    chessBoard[row][col] = movedPiece;
+    chessBoard.state[activeSquare[0]][activeSquare[1]].piece = undefined;
+
+    chessBoard.setPiece(movedPiece, row, col);
 
     updateSquare(...activeSquare);
     updateSquare(row, col);
@@ -222,13 +103,16 @@ const squareClickFunction = (row, col) => {
         elem.classList.remove("active");
     }
 
+    // The currently active square was clicked
     if (activeSquare[0] === row && activeSquare[1] === col) {
         getSquareElem(...activeSquare).classList.remove("selected");
         activeSquare = [null, null];
+    // A new active square was chosen
     } else if (activeSquare[0] === null && activeSquare[1] === null) {
         activeSquare = [row, col];
         getSquareElem(...activeSquare).classList.add("selected");
         showPossibleMoves();
+    // Try moving a piece from the currently active square to the selected location 
     } else {
         getSquareElem(...activeSquare).classList.remove("selected");
         tryMove(row, col);
