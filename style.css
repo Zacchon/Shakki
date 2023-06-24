@@ -14,6 +14,10 @@
     grid-area: inner-div;
 }
 
+#board {
+    border-spacing: 0;
+}
+
 .white.square {
     background-color: wheat;
 }
