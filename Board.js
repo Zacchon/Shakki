@@ -28,8 +28,15 @@ class Board {
         }
     }
 
+    /**
+     * Place a piece to a location on the board. For emptying a square, undefined is used.
+     */
     setPiece(piece, row, col) {
         this.state[row][col].piece = piece;
+        if (!piece) {
+            return;
+        }
+
         piece.board = this;
         piece.row = row;
         piece.column = col;

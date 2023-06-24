@@ -85,10 +85,8 @@ const tryMove = (row, col) => {
         return;
     }
     
-    chessBoard.state[activeSquare[0]][activeSquare[1]].piece = undefined;
-
-    chessBoard.setPiece(movedPiece, row, col);
-
+    movedPiece.move(row, col);
+    
     updateSquare(...activeSquare);
     updateSquare(row, col);
 
