@@ -55,6 +55,9 @@ class Board {
     }
 
     isEmpty(row, col) {
+        if (!this.isWithinBounds(row, col)) {
+            return false;
+        }
         const piece = this.state[row][col].piece;
         if (!piece) {
             return true;
@@ -63,11 +66,11 @@ class Board {
     }
 
     isAllied(row, col, color) {
-        return !this.isEmpty(row, col) && this.state[row][col].piece.color === color;
+        return this.isWithinBounds(row, col) && !this.isEmpty(row, col) && this.state[row][col].piece.color === color;
     }
 
     isEnemy(row, col, color) {
-        return !this.isEmpty(row, col) && this.state[row][col].piece.color !== color;
+        return this.isWithinBounds(row, col) && !this.isEmpty(row, col) && this.state[row][col].piece.color !== color;
     }
 
     isSafeFor(row, col, color) {
