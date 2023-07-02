@@ -81,5 +81,28 @@ class Board {
         }
         return true; 
     }
+
+    /**
+     * [INCORRECT] 
+     * Go through all the pieces on board and update seerPieces for each Square.
+     * 
+     * TOFIX: Currently "seeing" means that a piece can move to the square. This is not the same as 
+     * being able to attack in the case of pawns. Thus, isSafeFor incorrectly restricts some king moves
+     * with this version of recalculateSeers. As a fix, moves could be divided into subcategories.
+     */
+    recalculateSeers() {
+        this.state.forEach(rowArray => rowArray.forEach(square => square.seerPieces.clear()));
+
+        for (let row=0; row<this.NROWS; row++) {
+            for (let col=0; col<this.NCOLS; col++) {
+                const piece = this.state[row][col].piece;
+                if (!piece) continue;
+
+                for (const [moveRow, moveCol] of piece.legalMoves()) {
+                    this.state[moveRow][moveCol].seerPieces.add(piece);
+                }
+            }
+        }
+    }
     
 }
